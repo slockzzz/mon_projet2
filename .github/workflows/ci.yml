@@ -1,0 +1,16 @@
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+      
+      - name: Install dependencies
+        run: |
+          composer install
+          
+      - name: Set executable permission for phpcs
+        run: chmod +x vendor/bin/phpcs
+
+      - name: Run PHPCS
+        run: vendor/bin/phpcs --standard=PSR2 src/MesDates.php
