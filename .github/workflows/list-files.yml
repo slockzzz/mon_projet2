@@ -1,35 +1,19 @@
-name: Code Quality & File Check
+name: Lint PHP Code
 
-on:
-  push:
-    branches:
-      - mes-dates
-  pull_request:
-    branches:
-      - main
-      - master
+on: [push]
 
 jobs:
-  list-files:
-    name: List Repository Files
+  phpcs:
+    name: Run PHPCS
     runs-on: ubuntu-latest
-    steps:
-      - name: Checkout Repository
-        uses: actions/checkout@v2
-      - name: List Files
-        run: ls -R
 
-  lint-code:
-    name: Lint PHP Code
-    runs-on: ubuntu-latest
     steps:
-      - name: Checkout Repository
+      - name: Checkout repository
         uses: actions/checkout@v2
-      - name: Setup PHP
-        uses: shivammathur/setup-php@v2
-        with:
-          php-version: '8.0'
-      - name: Install PHPCS
-        run: curl -OL https://squizlabs.github.io/PHP_CodeSniffer/phpcs.phar
-      - name: Run PHPCS Linting
-        run: php phpcs.phar --standard=PSR12 src
+
+      - name: Install dependencies
+        run: |
+          composer install
+
+      - name: Run PHPCS
+        run: vendor/bin/phpcs --standard=PSR2 src/MesDates.php
