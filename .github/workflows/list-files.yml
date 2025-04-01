@@ -1,19 +1,22 @@
-name: Lint PHP Code
-
-on: [push]
+name: Lint PHP code with PHPCS
+on: [push, pull_request]
 
 jobs:
-  phpcs:
-    name: Run PHPCS
+  lint:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Checkout repository
+      - name: Checkout code
         uses: actions/checkout@v2
+
+      - name: Set up PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '7.4'
 
       - name: Install dependencies
         run: |
-          composer install
+          composer install --dev
 
       - name: Run PHPCS
         run: vendor/bin/phpcs --standard=PSR2 src/MesDates.php
