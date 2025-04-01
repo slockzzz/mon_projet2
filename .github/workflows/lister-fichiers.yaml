@@ -1,28 +1,13 @@
-name: Lister les fichiers et Linter le code
-
-on:
-  push:
-    branches:
-      - mes-dates
-
 jobs:
   linter:
     runs-on: ubuntu-latest
-
     steps:
-    - name: Checkout code
-      uses: actions/checkout@v2
 
-    - name: Lister les fichiers
-      run: ls -la
+      - name: Lister les fichiers
+        run: ls -la
 
-    - name: Setup PHP with PECL extension
-      uses: shivammathur/setup-php@v2
-      with:
-        php-version: '8.0'
+      - name: Installer PHP_CodeSniffer
+        run: curl -OL https://squizlabs.github.io/PHP_CodeSniffer/phpcs.phar
 
-    - name: Installer PHP_CodeSniffer
-      run: curl -OL https://squizlabs.github.io/PHP_CodeSniffer/phpcs.phar
-
-    - name: Linter le code avec PHPCS
-      run: php phpcs.phar --standard=PSR12 .
+      - name: Linter le code avec PHPCS
+        run: php phpcs.phar --standard=PSR12 .
