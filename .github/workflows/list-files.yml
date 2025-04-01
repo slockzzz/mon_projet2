@@ -1,0 +1,16 @@
+name: List Repository Files
+
+on:
+  push:
+    branches:
+      - mes-dates
+
+jobs:
+  list-files:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v2
+      - name: List Files
+        run: ls -R
+ 
