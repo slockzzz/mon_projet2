@@ -1,11 +1,24 @@
-name: List Repository Files
+name: Code Quality & File Check
 
 on:
   push:
     branches:
       - mes-dates
+  pull_request:
+    branches:
+      - main
+      - master
 
 jobs:
+  list-files:
+    name: List Repository Files
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v2
+      - name: List Files
+        run: ls -R
+
   lint-code:
     name: Lint PHP Code
     runs-on: ubuntu-latest
@@ -20,4 +33,3 @@ jobs:
         run: curl -OL https://squizlabs.github.io/PHP_CodeSniffer/phpcs.phar
       - name: Run PHPCS Linting
         run: php phpcs.phar --standard=PSR12 src
- 
