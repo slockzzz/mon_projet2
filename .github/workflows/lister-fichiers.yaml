@@ -8,9 +8,11 @@ on:
 jobs:
   linter:
     runs-on: ubuntu-latest
+
     steps:
     - name: Checkout code
       uses: actions/checkout@v2
+
     - name: Lister les fichiers
       run: ls -la
 
@@ -23,4 +25,4 @@ jobs:
       run: curl -OL https://squizlabs.github.io/PHP_CodeSniffer/phpcs.phar
 
     - name: Linter le code avec PHPCS
-      run: php phpcs.phar --standard=PSR12 src/
+      run: php phpcs.phar --standard=PSR12 .
