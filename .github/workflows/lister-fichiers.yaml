@@ -1,0 +1,22 @@
+name: Lister fichiers et Linting avec PHPCS
+
+on:
+  push:
+    branches:
+      - mes-dates
+
+jobs:
+  linter:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Lister les fichiers
+        run: ls -la
+
+      - name: Installer PHP_CodeSniffer
+        run: curl -OL https://squizlabs.github.io/PHP_CodeSniffer/phpcs.phar
+
+      - name: Linter le code avec PHPCS
+        run: php phpcs.phar --standard=PSR12 .
