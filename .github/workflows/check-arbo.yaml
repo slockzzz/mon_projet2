@@ -1,4 +1,4 @@
-name: Vérification arborescence
+name: Vérification de l'arborescence
 on:
   pull_request:
     branches:
@@ -10,7 +10,7 @@ jobs:
     steps:
       - name: Checkout du dépôt
         uses: actions/checkout@v2
-      - name: Vérification de l’arborescence
+      - name: Vérification de l'arborescence
         run: |
           test -d site/img && test -d site/css && test -d site/js && test -d src
           find site -type f ! -name "*.html" ! -name "*.php" -exec false {} +
