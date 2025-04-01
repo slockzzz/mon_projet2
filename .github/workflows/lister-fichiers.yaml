@@ -1,8 +1,14 @@
+name: Lister fichiers et Linting avec PHPCS
+
+on:
+  push:
+    branches:
+      - mes-dates
+
 jobs:
   linter:
     runs-on: ubuntu-latest
     steps:
-
       - name: Lister les fichiers
         run: ls -la
 
