@@ -1,1 +1,15 @@
- 
+ name: Lister les fichiers
+
+on:
+  push:  # Déclenche le workflow lors d'un push
+
+jobs:
+  afficher-fichiers:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout du code
+        uses: actions/checkout@v2
+
+      - name: Afficher les fichiers du repo
+        run: ls -la
+
