@@ -1,6 +1,6 @@
 name: Vérification du code avec PHPCS
 
-on: 
+on:
   push:
     branches:
       - mes-dates
@@ -12,14 +12,14 @@ jobs:
     steps:
       - name: Checkout du code
         uses: actions/checkout@v2
-      
+        
       - name: Installer PHP et PHPCS
         run: |
-          sudo apt-get update  # Met à jour la liste des paquets
-          sudo apt-get install -y php-cli  # Installe PHP
-          curl -OL https://squizlabs.github.io/PHP_CodeSniffer/phpcs.phar  # Télécharge PHPCS
-          chmod +x phpcs.phar  # Rends PHPCS exécutable
-          mv phpcs.phar /usr/local/bin/phpcs  # Déplace PHPCS dans un dossier accessible
+          sudo apt-get update
+          sudo apt-get install -y php-cli
+          curl -OL https://squizlabs.github.io/PHP_CodeSniffer/phpcs.phar
+          chmod +x phpcs.phar
+          mv phpcs.phar /usr/local/bin/phpcs
 
       - name: Lancer PHPCS
         run: phpcs --standard=PSR12 src/
