@@ -1,14 +1,12 @@
 name: Lister les fichiers
 
 on: 
-  push:   # Cela indique que le workflow se déclenche sur un push
+  push:
     branches:
-      - main   # Le workflow sera déclenché pour les pushs vers la branche "main"
-
+      - mes-dates
 jobs:
   afficher-fichiers:
     runs-on: ubuntu-latest
-    
     steps:
       - name: Checkout du code
         uses: actions/checkout@v2
