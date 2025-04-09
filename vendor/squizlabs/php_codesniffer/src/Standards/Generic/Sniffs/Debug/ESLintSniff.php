@@ -4,17 +4,14 @@
  *
  * @author    Ryan McCue <ryan+gh@hmn.md>
  * @copyright 2006-2015 Squiz Pty Ltd (ABN 77 084 670 600)
- * @license   https://github.com/PHPCSStandards/PHP_CodeSniffer/blob/master/licence.txt BSD Licence
- *
- * @deprecated 3.9.0
+ * @license   https://github.com/squizlabs/PHP_CodeSniffer/blob/master/licence.txt BSD Licence
  */
 
 namespace PHP_CodeSniffer\Standards\Generic\Sniffs\Debug;
 
-use PHP_CodeSniffer\Config;
-use PHP_CodeSniffer\Files\File;
 use PHP_CodeSniffer\Sniffs\Sniff;
-use PHP_CodeSniffer\Util\Common;
+use PHP_CodeSniffer\Files\File;
+use PHP_CodeSniffer\Config;
 
 class ESLintSniff implements Sniff
 {
@@ -37,7 +34,7 @@ class ESLintSniff implements Sniff
     /**
      * Returns the token types that this sniff is interested in.
      *
-     * @return array<int|string>
+     * @return int[]
      */
     public function register()
     {
@@ -53,14 +50,14 @@ class ESLintSniff implements Sniff
      * @param int                         $stackPtr  The position in the stack where
      *                                               the token was found.
      *
-     * @return int
-     * @throws \PHP_CodeSniffer\Exceptions\RuntimeException If jshint.js could not be run.
+     * @return void
+     * @throws \PHP_CodeSniffer\Exceptions\RuntimeException If jshint.js could not be run
      */
     public function process(File $phpcsFile, $stackPtr)
     {
         $eslintPath = Config::getExecutablePath('eslint');
         if ($eslintPath === null) {
-            return $phpcsFile->numTokens;
+            return;
         }
 
         $filename = $phpcsFile->getFilename();
@@ -79,20 +76,20 @@ class ESLintSniff implements Sniff
             $eslintOptions[] = '--config '.escapeshellarg($configFile);
         }
 
-        $cmd = Common::escapeshellcmd(escapeshellarg($eslintPath).' '.implode(' ', $eslintOptions).' '.escapeshellarg($filename));
+        $cmd = escapeshellcmd(escapeshellarg($eslintPath).' '.implode(' ', $eslintOptions).' '.escapeshellarg($filename));
 
         // Execute!
         exec($cmd, $stdout, $code);
 
         if ($code <= 0) {
             // No errors, continue.
-            return $phpcsFile->numTokens;
+            return ($phpcsFile->numTokens + 1);
         }
 
         $data = json_decode(implode("\n", $stdout));
         if (json_last_error() !== JSON_ERROR_NONE) {
             // Ignore any errors.
-            return $phpcsFile->numTokens;
+            return ($phpcsFile->numTokens + 1);
         }
 
         // Data is a list of files, but we only pass a single one.
@@ -107,7 +104,7 @@ class ESLintSniff implements Sniff
         }
 
         // Ignore the rest of the file.
-        return $phpcsFile->numTokens;
+        return ($phpcsFile->numTokens + 1);
 
     }//end process()
 

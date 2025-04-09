@@ -60,7 +60,3 @@ function functionName(?string $arg1, ?int &$arg2):?string {}
 function functionName(?string $arg1, ?int &$arg2):  ?string {}
 function functionName(?string $arg1, ?int &$arg2):
 ?string {}
-
-fn (?\DateTime $arg) : ?\DateTime => $arg;
-
-return (!$a ? [ new class { public function b(): c {} } ] : []);

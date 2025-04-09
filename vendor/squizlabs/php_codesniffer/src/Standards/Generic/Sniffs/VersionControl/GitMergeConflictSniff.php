@@ -1,16 +1,16 @@
 <?php
 /**
- * Check for merge conflict artefacts.
+ * Check for merge conflict artifacts
  *
  * @author    Juliette Reinders Folmer <phpcs_nospam@adviesenzo.nl>
  * @copyright 2017 Juliette Reinders Folmer. All rights reserved.
- * @license   https://github.com/PHPCSStandards/PHP_CodeSniffer/blob/master/licence.txt BSD Licence
+ * @license   https://github.com/squizlabs/PHP_CodeSniffer/blob/master/licence.txt BSD Licence
  */
 
 namespace PHP_CodeSniffer\Standards\Generic\Sniffs\VersionControl;
 
-use PHP_CodeSniffer\Files\File;
 use PHP_CodeSniffer\Sniffs\Sniff;
+use PHP_CodeSniffer\Files\File;
 
 class GitMergeConflictSniff implements Sniff
 {
@@ -30,14 +30,11 @@ class GitMergeConflictSniff implements Sniff
     /**
      * Returns an array of tokens this test wants to listen for.
      *
-     * @return array<int|string>
+     * @return array
      */
     public function register()
     {
-        return [
-            T_OPEN_TAG,
-            T_OPEN_TAG_WITH_ECHO,
-        ];
+        return [T_OPEN_TAG];
 
     }//end register()
 
@@ -49,7 +46,7 @@ class GitMergeConflictSniff implements Sniff
      * @param int                         $stackPtr  The position of the current token in the
      *                                               stack passed in $tokens.
      *
-     * @return int
+     * @return void
      */
     public function process(File $phpcsFile, $stackPtr)
     {
@@ -220,7 +217,7 @@ class GitMergeConflictSniff implements Sniff
         }//end for
 
         // Ignore the rest of the file.
-        return $phpcsFile->numTokens;
+        return ($phpcsFile->numTokens + 1);
 
     }//end process()
 

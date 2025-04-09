@@ -1,16 +1,39 @@
+name: CI Workflow
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
 jobs:
-  lint:
+  test:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
-      
+
+      - name: Set up PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.3'
+
       - name: Install dependencies
         run: |
-          composer install
-          
-      - name: Set executable permission for phpcs
-        run: chmod +x vendor/bin/phpcs
+          composer install --no-dev
 
-      - name: Run PHPCS
-        run: vendor/bin/phpcs --standard=PSR2 src/MesDates.php
+      - name: Ensure phpcs has execute permissions
+        run: |
+          sudo chmod -R +x vendor/bin # Utiliser sudo pour s'assurer que les permissions sont appliquées
+          ls -l vendor/bin/phpcs # Vérification des permissions du fichier phpcs
+
+      - name: Run PHPCS linting
+        run: |
+          vendor/bin/phpcs --standard=PSR2 src/MesDates.php
+
+      - name: Run PHPUnit tests
+        run: |
+          vendor/bin/phpunit

@@ -4,15 +4,14 @@
  *
  * @author    Greg Sherwood <gsherwood@squiz.net>
  * @copyright 2006-2015 Squiz Pty Ltd (ABN 77 084 670 600)
- * @license   https://github.com/PHPCSStandards/PHP_CodeSniffer/blob/master/licence.txt BSD Licence
+ * @license   https://github.com/squizlabs/PHP_CodeSniffer/blob/master/licence.txt BSD Licence
  */
 
 namespace PHP_CodeSniffer\Standards\Squiz\Sniffs\Classes;
 
-use PHP_CodeSniffer\Files\File;
 use PHP_CodeSniffer\Sniffs\Sniff;
+use PHP_CodeSniffer\Files\File;
 use PHP_CodeSniffer\Util\Common;
-use PHP_CodeSniffer\Util\Tokens;
 
 class ValidClassNameSniff implements Sniff
 {
@@ -21,7 +20,7 @@ class ValidClassNameSniff implements Sniff
     /**
      * Returns an array of tokens this test wants to listen for.
      *
-     * @return array<int|string>
+     * @return array
      */
     public function register()
     {
@@ -29,7 +28,6 @@ class ValidClassNameSniff implements Sniff
             T_CLASS,
             T_INTERFACE,
             T_TRAIT,
-            T_ENUM,
         ];
 
     }//end register()
@@ -59,8 +57,8 @@ class ValidClassNameSniff implements Sniff
         // simply look for the first T_STRING because a class name
         // starting with the number will be multiple tokens.
         $opener    = $tokens[$stackPtr]['scope_opener'];
-        $nameStart = $phpcsFile->findNext(Tokens::$emptyTokens, ($stackPtr + 1), $opener, true);
-        $nameEnd   = $phpcsFile->findNext((Tokens::$emptyTokens + [T_COLON => T_COLON]), $nameStart, $opener);
+        $nameStart = $phpcsFile->findNext(T_WHITESPACE, ($stackPtr + 1), $opener, true);
+        $nameEnd   = $phpcsFile->findNext(T_WHITESPACE, $nameStart, $opener);
         if ($nameEnd === false) {
             $name = $tokens[$nameStart]['content'];
         } else {
@@ -76,7 +74,7 @@ class ValidClassNameSniff implements Sniff
                 $type,
                 $name,
             ];
-            $phpcsFile->addError($error, $nameStart, 'NotCamelCaps', $data);
+            $phpcsFile->addError($error, $stackPtr, 'NotCamelCaps', $data);
             $phpcsFile->recordMetric($stackPtr, 'PascalCase class name', 'no');
         } else {
             $phpcsFile->recordMetric($stackPtr, 'PascalCase class name', 'yes');

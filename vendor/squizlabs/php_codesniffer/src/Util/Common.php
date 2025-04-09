@@ -4,13 +4,10 @@
  *
  * @author    Greg Sherwood <gsherwood@squiz.net>
  * @copyright 2006-2015 Squiz Pty Ltd (ABN 77 084 670 600)
- * @license   https://github.com/PHPCSStandards/PHP_CodeSniffer/blob/master/licence.txt BSD Licence
+ * @license   https://github.com/squizlabs/PHP_CodeSniffer/blob/master/licence.txt BSD Licence
  */
 
 namespace PHP_CodeSniffer\Util;
-
-use InvalidArgumentException;
-use Phar;
 
 class Common
 {
@@ -38,7 +35,7 @@ class Common
      *
      * @param string $path The path to use.
      *
-     * @return bool
+     * @return mixed
      */
     public static function isPharFile($path)
     {
@@ -52,41 +49,13 @@ class Common
 
 
     /**
-     * Checks if a file is readable.
-     *
-     * Addresses PHP bug related to reading files from network drives on Windows.
-     * e.g. when using WSL2.
-     *
-     * @param string $path The path to the file.
-     *
-     * @return boolean
-     */
-    public static function isReadable($path)
-    {
-        if (@is_readable($path) === true) {
-            return true;
-        }
-
-        if (@file_exists($path) === true && @is_file($path) === true) {
-            $f = @fopen($path, 'rb');
-            if (fclose($f) === true) {
-                return true;
-            }
-        }
-
-        return false;
-
-    }//end isReadable()
-
-
-    /**
      * CodeSniffer alternative for realpath.
      *
      * Allows for PHAR support.
      *
      * @param string $path The path to use.
      *
-     * @return string|false
+     * @return mixed
      */
     public static function realpath($path)
     {
@@ -115,7 +84,7 @@ class Common
             return $path;
         }
 
-        $phar  = Phar::running(false);
+        $phar  = \Phar::running(false);
         $extra = str_replace('phar://'.$phar, '', $path);
         $path  = realpath($phar);
         if ($path === false) {
@@ -243,32 +212,10 @@ class Common
 
 
     /**
-     * Escape a path to a system command.
-     *
-     * @param string $cmd The path to the system command.
-     *
-     * @return string
-     */
-    public static function escapeshellcmd($cmd)
-    {
-        $cmd = escapeshellcmd($cmd);
-
-        if (stripos(PHP_OS, 'WIN') === 0) {
-            // Spaces are not escaped by escapeshellcmd on Windows, but need to be
-            // for the command to be able to execute.
-            $cmd = preg_replace('`(?<!^) `', '^ ', $cmd);
-        }
-
-        return $cmd;
-
-    }//end escapeshellcmd()
-
-
-    /**
      * Prepares token content for output to screen.
      *
      * Replaces invisible characters so they are visible. On non-Windows
-     * operating systems it will also colour the invisible characters.
+     * OSes it will also colour the invisible characters.
      *
      * @param string   $content The content to prepare.
      * @param string[] $exclude A list of characters to leave invisible.
@@ -278,7 +225,7 @@ class Common
      */
     public static function prepareForOutput($content, $exclude=[])
     {
-        if (stripos(PHP_OS, 'WIN') === 0) {
+        if (strtoupper(substr(PHP_OS, 0, 3)) === 'WIN') {
             if (in_array("\r", $exclude, true) === false) {
                 $content = str_replace("\r", '\r', $content);
             }
@@ -311,20 +258,6 @@ class Common
         return $content;
 
     }//end prepareForOutput()
-
-
-    /**
-     * Strip colors from a text for output to screen.
-     *
-     * @param string $text The text to process.
-     *
-     * @return string
-     */
-    public static function stripColors($text)
-    {
-        return preg_replace('`\033\[[0-9;]+m`', '', $text);
-
-    }//end stripColors()
 
 
     /**
@@ -389,7 +322,7 @@ class Common
             for ($i = 1; $i < $length; $i++) {
                 $ascii = ord($string[$i]);
                 if ($ascii >= 48 && $ascii <= 57) {
-                    // The character is a number, so it can't be a capital.
+                    // The character is a number, so it cant be a capital.
                     $isCaps = false;
                 } else {
                     if (strtoupper($string[$i]) === $string[$i]) {
@@ -421,7 +354,7 @@ class Common
      */
     public static function isUnderscoreName($string)
     {
-        // If there is whitespace in the name, it can't be valid.
+        // If there are space in the name, it can't be valid.
         if (strpos($string, ' ') !== false) {
             return false;
         }
@@ -530,43 +463,25 @@ class Common
      * @param string $sniffClass The fully qualified sniff class name.
      *
      * @return string
-     *
-     * @throws \InvalidArgumentException When $sniffClass is not a non-empty string.
-     * @throws \InvalidArgumentException When $sniffClass is not a FQN for a sniff(test) class.
      */
     public static function getSniffCode($sniffClass)
     {
-        if (is_string($sniffClass) === false || $sniffClass === '') {
-            throw new InvalidArgumentException('The $sniffClass parameter must be a non-empty string');
-        }
-
-        $parts      = explode('\\', $sniffClass);
-        $partsCount = count($parts);
-        $sniff      = $parts[($partsCount - 1)];
+        $parts = explode('\\', $sniffClass);
+        $sniff = array_pop($parts);
 
         if (substr($sniff, -5) === 'Sniff') {
             // Sniff class name.
             $sniff = substr($sniff, 0, -5);
-        } else if (substr($sniff, -8) === 'UnitTest') {
+        } else {
             // Unit test class name.
             $sniff = substr($sniff, 0, -8);
-        } else {
-            throw new InvalidArgumentException(
-                'The $sniffClass parameter was not passed a fully qualified sniff(test) class name. Received: '.$sniffClass
-            );
         }
 
-        $standard = '';
-        if (isset($parts[($partsCount - 4)]) === true) {
-            $standard = $parts[($partsCount - 4)];
-        }
-
-        $category = '';
-        if (isset($parts[($partsCount - 2)]) === true) {
-            $category = $parts[($partsCount - 2)];
-        }
-
-        return $standard.'.'.$category.'.'.$sniff;
+        $category = array_pop($parts);
+        $sniffDir = array_pop($parts);
+        $standard = array_pop($parts);
+        $code     = $standard.'.'.$category.'.'.$sniff;
+        return $code;
 
     }//end getSniffCode()
 

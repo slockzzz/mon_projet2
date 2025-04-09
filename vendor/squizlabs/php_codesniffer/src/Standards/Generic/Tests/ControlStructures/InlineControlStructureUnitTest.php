@@ -4,19 +4,14 @@
  *
  * @author    Greg Sherwood <gsherwood@squiz.net>
  * @copyright 2006-2015 Squiz Pty Ltd (ABN 77 084 670 600)
- * @license   https://github.com/PHPCSStandards/PHP_CodeSniffer/blob/master/licence.txt BSD Licence
+ * @license   https://github.com/squizlabs/PHP_CodeSniffer/blob/master/licence.txt BSD Licence
  */
 
 namespace PHP_CodeSniffer\Standards\Generic\Tests\ControlStructures;
 
 use PHP_CodeSniffer\Tests\Standards\AbstractSniffUnitTest;
 
-/**
- * Unit test class for the InlineControlStructure sniff.
- *
- * @covers \PHP_CodeSniffer\Standards\Generic\Sniffs\ControlStructures\InlineControlStructureSniff
- */
-final class InlineControlStructureUnitTest extends AbstractSniffUnitTest
+class InlineControlStructureUnitTest extends AbstractSniffUnitTest
 {
 
 
@@ -30,7 +25,7 @@ final class InlineControlStructureUnitTest extends AbstractSniffUnitTest
      *
      * @return array<int, int>
      */
-    public function getErrorList($testFile='')
+    public function getErrorList($testFile='InlineControlStructureUnitTest.1.inc')
     {
         switch ($testFile) {
         case 'InlineControlStructureUnitTest.1.inc':
@@ -42,13 +37,14 @@ final class InlineControlStructureUnitTest extends AbstractSniffUnitTest
                 15  => 1,
                 17  => 1,
                 23  => 1,
+                42  => 1,
+                43  => 1,
                 45  => 1,
                 46  => 1,
                 49  => 1,
                 62  => 1,
                 66  => 1,
                 78  => 1,
-                109 => 1,
                 120 => 1,
                 128 => 1,
                 134 => 1,
@@ -70,20 +66,19 @@ final class InlineControlStructureUnitTest extends AbstractSniffUnitTest
                 191 => 1,
                 195 => 1,
                 198 => 1,
-                204 => 1,
-                205 => 1,
+                206 => 1,
                 222 => 1,
+                226 => 1,
+                228 => 1,
+                230 => 1,
                 232 => 1,
                 235 => 1,
                 236 => 1,
                 238 => 1,
                 242 => 1,
-                260 => 1,
-                269 => 1,
-                278 => 1,
             ];
 
-        case 'InlineControlStructureUnitTest.1.js':
+        case 'InlineControlStructureUnitTest.js':
             return [
                 3  => 1,
                 7  => 1,
@@ -93,7 +88,6 @@ final class InlineControlStructureUnitTest extends AbstractSniffUnitTest
                 21 => 1,
                 27 => 1,
                 30 => 1,
-                35 => 1,
             ];
 
         default:

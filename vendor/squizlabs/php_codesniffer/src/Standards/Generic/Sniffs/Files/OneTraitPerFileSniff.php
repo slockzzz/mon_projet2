@@ -4,13 +4,13 @@
  *
  * @author    Alexander Obuhovich <aik.bold@gmail.com>
  * @copyright 2010-2014 Alexander Obuhovich
- * @license   https://github.com/PHPCSStandards/PHP_CodeSniffer/blob/master/licence.txt BSD Licence
+ * @license   https://github.com/squizlabs/PHP_CodeSniffer/blob/master/licence.txt BSD Licence
  */
 
 namespace PHP_CodeSniffer\Standards\Generic\Sniffs\Files;
 
-use PHP_CodeSniffer\Files\File;
 use PHP_CodeSniffer\Sniffs\Sniff;
+use PHP_CodeSniffer\Files\File;
 
 class OneTraitPerFileSniff implements Sniff
 {
@@ -19,7 +19,7 @@ class OneTraitPerFileSniff implements Sniff
     /**
      * Returns an array of tokens this test wants to listen for.
      *
-     * @return array<int|string>
+     * @return array
      */
     public function register()
     {
@@ -39,13 +39,7 @@ class OneTraitPerFileSniff implements Sniff
      */
     public function process(File $phpcsFile, $stackPtr)
     {
-        $tokens = $phpcsFile->getTokens();
-        $start  = ($stackPtr + 1);
-        if (isset($tokens[$stackPtr]['scope_closer']) === true) {
-            $start = ($tokens[$stackPtr]['scope_closer'] + 1);
-        }
-
-        $nextClass = $phpcsFile->findNext($this->register(), $start);
+        $nextClass = $phpcsFile->findNext($this->register(), ($stackPtr + 1));
         if ($nextClass !== false) {
             $error = 'Only one trait is allowed in a file';
             $phpcsFile->addError($error, $nextClass, 'MultipleFound');

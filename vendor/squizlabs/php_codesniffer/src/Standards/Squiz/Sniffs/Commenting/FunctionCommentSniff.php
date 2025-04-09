@@ -4,30 +4,23 @@
  *
  * @author    Greg Sherwood <gsherwood@squiz.net>
  * @copyright 2006-2015 Squiz Pty Ltd (ABN 77 084 670 600)
- * @license   https://github.com/PHPCSStandards/PHP_CodeSniffer/blob/master/licence.txt BSD Licence
+ * @license   https://github.com/squizlabs/PHP_CodeSniffer/blob/master/licence.txt BSD Licence
  */
 
 namespace PHP_CodeSniffer\Standards\Squiz\Sniffs\Commenting;
 
-use PHP_CodeSniffer\Config;
-use PHP_CodeSniffer\Files\File;
 use PHP_CodeSniffer\Standards\PEAR\Sniffs\Commenting\FunctionCommentSniff as PEARFunctionCommentSniff;
+use PHP_CodeSniffer\Files\File;
+use PHP_CodeSniffer\Config;
 use PHP_CodeSniffer\Util\Common;
 
 class FunctionCommentSniff extends PEARFunctionCommentSniff
 {
 
     /**
-     * Whether to skip inheritdoc comments.
-     *
-     * @var boolean
-     */
-    public $skipIfInheritdoc = false;
-
-    /**
      * The current PHP version.
      *
-     * @var integer|string|null
+     * @var integer
      */
     private $phpVersion = null;
 
@@ -47,12 +40,6 @@ class FunctionCommentSniff extends PEARFunctionCommentSniff
         $tokens = $phpcsFile->getTokens();
         $return = null;
 
-        if ($this->skipIfInheritdoc === true) {
-            if ($this->checkInheritdoc($phpcsFile, $stackPtr, $commentStart) === true) {
-                return;
-            }
-        }
-
         foreach ($tokens[$commentStart]['comment_tags'] as $tag) {
             if ($tokens[$tag]['content'] === '@return') {
                 if ($return !== null) {
@@ -67,7 +54,10 @@ class FunctionCommentSniff extends PEARFunctionCommentSniff
 
         // Skip constructor and destructor.
         $methodName      = $phpcsFile->getDeclarationName($stackPtr);
-        $isSpecialMethod = in_array($methodName,  $this->specialMethods, true);
+        $isSpecialMethod = ($methodName === '__construct' || $methodName === '__destruct');
+        if ($isSpecialMethod === true) {
+            return;
+        }
 
         if ($return !== null) {
             $content = $tokens[($return + 2)]['content'];
@@ -86,7 +76,7 @@ class FunctionCommentSniff extends PEARFunctionCommentSniff
                 // Check return type (can be multiple, separated by '|').
                 $typeNames      = explode('|', $returnType);
                 $suggestedNames = [];
-                foreach ($typeNames as $typeName) {
+                foreach ($typeNames as $i => $typeName) {
                     $suggestedName = Common::suggestType($typeName);
                     if (in_array($suggestedName, $suggestedNames, true) === false) {
                         $suggestedNames[] = $suggestedName;
@@ -143,12 +133,9 @@ class FunctionCommentSniff extends PEARFunctionCommentSniff
                             }
                         }
                     }//end if
-                } else if ($returnType !== 'mixed'
-                    && $returnType !== 'never'
-                    && in_array('void', $typeNames, true) === false
-                ) {
-                    // If return type is not void, never, or mixed, there needs to be a
-                    // return statement somewhere in the function that returns something.
+                } else if ($returnType !== 'mixed' && in_array('void', $typeNames, true) === false) {
+                    // If return type is not void, there needs to be a return statement
+                    // somewhere in the function that returns something.
                     if (isset($tokens[$stackPtr]['scope_closer']) === true) {
                         $endToken = $tokens[$stackPtr]['scope_closer'];
                         for ($returnToken = $stackPtr; $returnToken < $endToken; $returnToken++) {
@@ -181,10 +168,6 @@ class FunctionCommentSniff extends PEARFunctionCommentSniff
                 }//end if
             }//end if
         } else {
-            if ($isSpecialMethod === true) {
-                return;
-            }
-
             $error = 'Missing @return tag in function comment';
             $phpcsFile->addError($error, $tokens[$commentStart]['comment_closer'], 'MissingReturn');
         }//end if
@@ -205,12 +188,6 @@ class FunctionCommentSniff extends PEARFunctionCommentSniff
     protected function processThrows(File $phpcsFile, $stackPtr, $commentStart)
     {
         $tokens = $phpcsFile->getTokens();
-
-        if ($this->skipIfInheritdoc === true) {
-            if ($this->checkInheritdoc($phpcsFile, $stackPtr, $commentStart) === true) {
-                return;
-            }
-        }
 
         foreach ($tokens[$commentStart]['comment_tags'] as $pos => $tag) {
             if ($tokens[$tag]['content'] !== '@throws') {
@@ -247,8 +224,6 @@ class FunctionCommentSniff extends PEARFunctionCommentSniff
                         $comment .= ' '.$tokens[$i]['content'];
                     }
                 }
-
-                $comment = trim($comment);
 
                 // Starts with a capital letter and ends with a fullstop.
                 $firstChar = $comment[0];
@@ -288,12 +263,6 @@ class FunctionCommentSniff extends PEARFunctionCommentSniff
         }
 
         $tokens = $phpcsFile->getTokens();
-
-        if ($this->skipIfInheritdoc === true) {
-            if ($this->checkInheritdoc($phpcsFile, $stackPtr, $commentStart) === true) {
-                return;
-            }
-        }
 
         $params  = [];
         $maxType = 0;
@@ -366,9 +335,6 @@ class FunctionCommentSniff extends PEARFunctionCommentSniff
                         $phpcsFile->addError($error, $tag, 'MissingParamComment');
                         $commentLines[] = ['comment' => ''];
                     }//end if
-                } else if ($tokens[($tag + 2)]['content'][0] === '$') {
-                    $error = 'Missing parameter type';
-                    $phpcsFile->addError($error, $tag, 'MissingParamType');
                 } else {
                     $error = 'Missing parameter name';
                     $phpcsFile->addError($error, $tag, 'MissingParamName');
@@ -411,10 +377,6 @@ class FunctionCommentSniff extends PEARFunctionCommentSniff
             $suggestedTypeNames = [];
 
             foreach ($typeNames as $typeName) {
-                if ($typeName === '') {
-                    continue;
-                }
-
                 // Strip nullable operator.
                 if ($typeName[0] === '?') {
                     $typeName = substr($typeName, 1);
@@ -457,13 +419,7 @@ class FunctionCommentSniff extends PEARFunctionCommentSniff
                     }
                 }
 
-                if ($this->phpVersion >= 80000) {
-                    if ($suggestedName === 'mixed') {
-                        $suggestedTypeHint = 'mixed';
-                    }
-                }
-
-                if ($suggestedTypeHint !== '' && isset($realParams[$pos]) === true && $param['var'] !== '') {
+                if ($suggestedTypeHint !== '' && isset($realParams[$pos]) === true) {
                     $typeHint = $realParams[$pos]['type_hint'];
 
                     // Remove namespace prefixes when comparing.
@@ -561,38 +517,16 @@ class FunctionCommentSniff extends PEARFunctionCommentSniff
 
             // Make sure the param name is correct.
             if (isset($realParams[$pos]) === true) {
-                $realName     = $realParams[$pos]['name'];
-                $paramVarName = $param['var'];
-
-                if ($param['var'][0] === '&') {
-                    // Even when passed by reference, the variable name in $realParams does not have
-                    // a leading '&'. This sniff will accept both '&$var' and '$var' in these cases.
-                    $paramVarName = substr($param['var'], 1);
-
-                    // This makes sure that the 'MissingParamTag' check won't throw a false positive.
-                    $foundParams[(count($foundParams) - 1)] = $paramVarName;
-
-                    if ($realParams[$pos]['pass_by_reference'] !== true && $realName === $paramVarName) {
-                        // Don't complain about this unless the param name is otherwise correct.
-                        $error = 'Doc comment for parameter %s is prefixed with "&" but parameter is not passed by reference';
-                        $code  = 'ParamNameUnexpectedAmpersandPrefix';
-                        $data  = [$paramVarName];
-
-                        // We're not offering an auto-fix here because we can't tell if the docblock
-                        // is wrong, or the parameter should be passed by reference.
-                        $phpcsFile->addError($error, $param['tag'], $code, $data);
-                    }
-                }
-
-                if ($realName !== $paramVarName) {
+                $realName = $realParams[$pos]['name'];
+                if ($realName !== $param['var']) {
                     $code = 'ParamNameNoMatch';
                     $data = [
-                        $paramVarName,
+                        $param['var'],
                         $realName,
                     ];
 
                     $error = 'Doc comment for parameter %s does not match ';
-                    if (strtolower($paramVarName) === strtolower($realName)) {
+                    if (strtolower($param['var']) === strtolower($realName)) {
                         $error .= 'case of ';
                         $code   = 'ParamNameNoCaseMatch';
                     }
@@ -600,7 +534,7 @@ class FunctionCommentSniff extends PEARFunctionCommentSniff
                     $error .= 'actual variable name %s';
 
                     $phpcsFile->addError($error, $param['tag'], $code, $data);
-                }//end if
+                }
             } else if (substr($param['var'], -4) !== ',...') {
                 // We must have an extra parameter comment.
                 $error = 'Superfluous parameter comment';
@@ -759,42 +693,6 @@ class FunctionCommentSniff extends PEARFunctionCommentSniff
         }//end if
 
     }//end checkSpacingAfterParamName()
-
-
-    /**
-     * Determines whether the whole comment is an inheritdoc comment.
-     *
-     * @param \PHP_CodeSniffer\Files\File $phpcsFile    The file being scanned.
-     * @param int                         $stackPtr     The position of the current token
-     *                                                  in the stack passed in $tokens.
-     * @param int                         $commentStart The position in the stack where the comment started.
-     *
-     * @return boolean TRUE if the docblock contains only {@inheritdoc} (case-insensitive).
-     */
-    protected function checkInheritdoc(File $phpcsFile, $stackPtr, $commentStart)
-    {
-        $tokens = $phpcsFile->getTokens();
-
-        $allowedTokens = [
-            T_DOC_COMMENT_OPEN_TAG,
-            T_DOC_COMMENT_WHITESPACE,
-            T_DOC_COMMENT_STAR,
-        ];
-        for ($i = $commentStart; $i <= $tokens[$commentStart]['comment_closer']; $i++) {
-            if (in_array($tokens[$i]['code'], $allowedTokens) === false) {
-                $trimmedContent = strtolower(trim($tokens[$i]['content']));
-
-                if ($trimmedContent === '{@inheritdoc}') {
-                    return true;
-                } else {
-                    return false;
-                }
-            }
-        }
-
-        return false;
-
-    }//end checkInheritdoc()
 
 
 }//end class

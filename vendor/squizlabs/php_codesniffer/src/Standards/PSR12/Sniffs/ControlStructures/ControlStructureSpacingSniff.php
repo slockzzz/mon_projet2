@@ -4,15 +4,15 @@
  *
  * @author    Greg Sherwood <gsherwood@squiz.net>
  * @copyright 2006-2019 Squiz Pty Ltd (ABN 77 084 670 600)
- * @license   https://github.com/PHPCSStandards/PHP_CodeSniffer/blob/master/licence.txt BSD Licence
+ * @license   https://github.com/squizlabs/PHP_CodeSniffer/blob/master/licence.txt BSD Licence
  */
 
 namespace PHP_CodeSniffer\Standards\PSR12\Sniffs\ControlStructures;
 
-use PHP_CodeSniffer\Files\File;
 use PHP_CodeSniffer\Sniffs\Sniff;
-use PHP_CodeSniffer\Standards\PSR2\Sniffs\ControlStructures\ControlStructureSpacingSniff as PSR2ControlStructureSpacing;
+use PHP_CodeSniffer\Files\File;
 use PHP_CodeSniffer\Util\Tokens;
+use PHP_CodeSniffer\Standards\PSR2\Sniffs\ControlStructures\ControlStructureSpacingSniff as PSR2Spacing;
 
 class ControlStructureSpacingSniff implements Sniff
 {
@@ -24,28 +24,11 @@ class ControlStructureSpacingSniff implements Sniff
      */
     public $indent = 4;
 
-    /**
-     * Instance of the PSR2 ControlStructureSpacingSniff sniff.
-     *
-     * @var \PHP_CodeSniffer\Standards\PSR2\Sniffs\ControlStructures\ControlStructureSpacingSniff
-     */
-    private $psr2ControlStructureSpacing;
-
-
-    /**
-     * Constructor.
-     */
-    public function __construct()
-    {
-        $this->psr2ControlStructureSpacing = new PSR2ControlStructureSpacing();
-
-    }//end __construct()
-
 
     /**
      * Returns an array of tokens this test wants to listen for.
      *
-     * @return array<int|string>
+     * @return array
      */
     public function register()
     {
@@ -55,9 +38,9 @@ class ControlStructureSpacingSniff implements Sniff
             T_FOREACH,
             T_FOR,
             T_SWITCH,
+            T_ELSE,
             T_ELSEIF,
             T_CATCH,
-            T_MATCH,
         ];
 
     }//end register()
@@ -87,8 +70,8 @@ class ControlStructureSpacingSniff implements Sniff
 
         if ($tokens[$parenOpener]['line'] === $tokens[$parenCloser]['line']) {
             // Conditions are all on the same line, so follow PSR2.
-            $this->psr2ControlStructureSpacing->process($phpcsFile, $stackPtr);
-            return;
+            $sniff = new PSR2Spacing();
+            return $sniff->process($phpcsFile, $stackPtr);
         }
 
         $next = $phpcsFile->findNext(T_WHITESPACE, ($parenOpener + 1), $parenCloser, true);
@@ -102,19 +85,7 @@ class ControlStructureSpacingSniff implements Sniff
             $error = 'The first expression of a multi-line control structure must be on the line after the opening parenthesis';
             $fix   = $phpcsFile->addFixableError($error, $next, 'FirstExpressionLine');
             if ($fix === true) {
-                $phpcsFile->fixer->beginChangeset();
-                if ($tokens[$next]['line'] > ($tokens[$parenOpener]['line'] + 1)) {
-                    for ($i = ($parenOpener + 1); $i < $next; $i++) {
-                        if ($tokens[$next]['line'] === $tokens[$i]['line']) {
-                            break;
-                        }
-
-                        $phpcsFile->fixer->replaceToken($i, '');
-                    }
-                }
-
                 $phpcsFile->fixer->addNewline($parenOpener);
-                $phpcsFile->fixer->endChangeset();
             }
         }
 
@@ -124,20 +95,12 @@ class ControlStructureSpacingSniff implements Sniff
         for ($i = $parenOpener; $i < $parenCloser; $i++) {
             if ($tokens[$i]['column'] !== 1
                 || $tokens[($i + 1)]['line'] > $tokens[$i]['line']
-                || isset(Tokens::$commentTokens[$tokens[$i]['code']]) === true
             ) {
                 continue;
             }
 
             if (($i + 1) === $parenCloser) {
                 break;
-            }
-
-            // Leave indentation inside multi-line strings.
-            if (isset(Tokens::$textStringTokens[$tokens[$i]['code']]) === true
-                || isset(Tokens::$heredocTokens[$tokens[$i]['code']]) === true
-            ) {
-                continue;
             }
 
             if ($tokens[$i]['code'] !== T_WHITESPACE) {
@@ -175,7 +138,7 @@ class ControlStructureSpacingSniff implements Sniff
                 } else {
                     $phpcsFile->fixer->beginChangeset();
                     for ($i = ($prev + 1); $i < $parenCloser; $i++) {
-                        // Maintain existing newline.
+                        // Maintian existing newline.
                         if ($tokens[$i]['line'] === $tokens[$prev]['line']) {
                             continue;
                         }

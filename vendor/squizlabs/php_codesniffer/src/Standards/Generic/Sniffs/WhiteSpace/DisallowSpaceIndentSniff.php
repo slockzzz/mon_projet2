@@ -4,13 +4,13 @@
  *
  * @author    Greg Sherwood <gsherwood@squiz.net>
  * @copyright 2006-2015 Squiz Pty Ltd (ABN 77 084 670 600)
- * @license   https://github.com/PHPCSStandards/PHP_CodeSniffer/blob/master/licence.txt BSD Licence
+ * @license   https://github.com/squizlabs/PHP_CodeSniffer/blob/master/licence.txt BSD Licence
  */
 
 namespace PHP_CodeSniffer\Standards\Generic\Sniffs\WhiteSpace;
 
-use PHP_CodeSniffer\Files\File;
 use PHP_CodeSniffer\Sniffs\Sniff;
+use PHP_CodeSniffer\Files\File;
 
 class DisallowSpaceIndentSniff implements Sniff
 {
@@ -37,14 +37,11 @@ class DisallowSpaceIndentSniff implements Sniff
     /**
      * Returns an array of tokens this test wants to listen for.
      *
-     * @return array<int|string>
+     * @return array
      */
     public function register()
     {
-        return [
-            T_OPEN_TAG,
-            T_OPEN_TAG_WITH_ECHO,
-        ];
+        return [T_OPEN_TAG];
 
     }//end register()
 
@@ -56,7 +53,7 @@ class DisallowSpaceIndentSniff implements Sniff
      * @param int                         $stackPtr  The position of the current token in
      *                                               the stack passed in $tokens.
      *
-     * @return int
+     * @return void
      */
     public function process(File $phpcsFile, $stackPtr)
     {
@@ -78,8 +75,6 @@ class DisallowSpaceIndentSniff implements Sniff
             T_INLINE_HTML            => true,
             T_DOC_COMMENT_WHITESPACE => true,
             T_COMMENT                => true,
-            T_END_HEREDOC            => true,
-            T_END_NOWDOC             => true,
         ];
 
         $eolLen = strlen($phpcsFile->eolChar);
@@ -204,18 +199,8 @@ class DisallowSpaceIndentSniff implements Sniff
                 }
             }//end if
 
-            $error     = 'Tabs must be used to indent lines; spaces are not allowed';
-            $errorCode = 'SpacesUsed';
-
-            // Report, but don't auto-fix space identation for a PHP 7.3+ flexible heredoc/nowdoc closer.
-            // Auto-fixing this would cause parse errors as the indentation of the heredoc/nowdoc contents
-            // needs to use the same type of indentation. Also see: https://3v4l.org/7OF3M .
-            if ($tokens[$i]['code'] === T_END_HEREDOC || $tokens[$i]['code'] === T_END_NOWDOC) {
-                $phpcsFile->addError($error, $i, $errorCode.'HeredocCloser');
-                continue;
-            }
-
-            $fix = $phpcsFile->addFixableError($error, $i, $errorCode);
+            $error = 'Tabs must be used to indent lines; spaces are not allowed';
+            $fix   = $phpcsFile->addFixableError($error, $i, 'SpacesUsed');
             if ($fix === true) {
                 $padding  = str_repeat("\t", $expectedTabs);
                 $padding .= str_repeat(' ', $expectedSpaces);
@@ -224,7 +209,7 @@ class DisallowSpaceIndentSniff implements Sniff
         }//end for
 
         // Ignore the rest of the file.
-        return $phpcsFile->numTokens;
+        return ($phpcsFile->numTokens + 1);
 
     }//end process()
 

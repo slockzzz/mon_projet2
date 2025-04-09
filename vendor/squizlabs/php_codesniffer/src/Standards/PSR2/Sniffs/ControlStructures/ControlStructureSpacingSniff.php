@@ -4,13 +4,13 @@
  *
  * @author    Greg Sherwood <gsherwood@squiz.net>
  * @copyright 2006-2015 Squiz Pty Ltd (ABN 77 084 670 600)
- * @license   https://github.com/PHPCSStandards/PHP_CodeSniffer/blob/master/licence.txt BSD Licence
+ * @license   https://github.com/squizlabs/PHP_CodeSniffer/blob/master/licence.txt BSD Licence
  */
 
 namespace PHP_CodeSniffer\Standards\PSR2\Sniffs\ControlStructures;
 
-use PHP_CodeSniffer\Files\File;
 use PHP_CodeSniffer\Sniffs\Sniff;
+use PHP_CodeSniffer\Files\File;
 use PHP_CodeSniffer\Util\Tokens;
 
 class ControlStructureSpacingSniff implements Sniff
@@ -34,7 +34,7 @@ class ControlStructureSpacingSniff implements Sniff
     /**
      * Returns an array of tokens this test wants to listen for.
      *
-     * @return array<int|string>
+     * @return array
      */
     public function register()
     {
@@ -44,9 +44,9 @@ class ControlStructureSpacingSniff implements Sniff
             T_FOREACH,
             T_FOR,
             T_SWITCH,
+            T_ELSE,
             T_ELSEIF,
             T_CATCH,
-            T_MATCH,
         ];
 
     }//end register()
@@ -108,8 +108,7 @@ class ControlStructureSpacingSniff implements Sniff
             }
         }//end if
 
-        $prev = $phpcsFile->findPrevious(T_WHITESPACE, ($parenCloser - 1), $parenOpener, true);
-        if ($tokens[$prev]['line'] === $tokens[$parenCloser]['line']) {
+        if ($tokens[$parenOpener]['line'] === $tokens[$parenCloser]['line']) {
             $spaceBeforeClose = 0;
             if ($tokens[($parenCloser - 1)]['code'] === T_WHITESPACE) {
                 $spaceBeforeClose = strlen(ltrim($tokens[($parenCloser - 1)]['content'], $phpcsFile->eolChar));

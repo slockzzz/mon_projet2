@@ -4,13 +4,13 @@
  *
  * @author    Greg Sherwood <gsherwood@squiz.net>
  * @copyright 2006-2015 Squiz Pty Ltd (ABN 77 084 670 600)
- * @license   https://github.com/PHPCSStandards/PHP_CodeSniffer/blob/master/licence.txt BSD Licence
+ * @license   https://github.com/squizlabs/PHP_CodeSniffer/blob/master/licence.txt BSD Licence
  */
 
 namespace PHP_CodeSniffer\Standards\PSR12\Sniffs\Files;
 
-use PHP_CodeSniffer\Files\File;
 use PHP_CodeSniffer\Sniffs\Sniff;
+use PHP_CodeSniffer\Files\File;
 use PHP_CodeSniffer\Util\Tokens;
 
 class ImportStatementSniff implements Sniff
@@ -20,7 +20,7 @@ class ImportStatementSniff implements Sniff
     /**
      * Returns an array of tokens this test wants to listen for.
      *
-     * @return array<int|string>
+     * @return array
      */
     public function register()
     {
@@ -48,11 +48,6 @@ class ImportStatementSniff implements Sniff
             return;
         }
 
-        if ($phpcsFile->hasCondition($stackPtr, Tokens::$ooScopeTokens) === true) {
-            // This rule only applies to import statements.
-            return;
-        }
-
         if ($tokens[$next]['code'] === T_STRING
             && (strtolower($tokens[$next]['content']) === 'function'
             || strtolower($tokens[$next]['content']) === 'const')
@@ -65,11 +60,7 @@ class ImportStatementSniff implements Sniff
         }
 
         $error = 'Import statements must not begin with a leading backslash';
-        $fix   = $phpcsFile->addFixableError($error, $next, 'LeadingSlash');
-
-        if ($fix === true) {
-            $phpcsFile->fixer->replaceToken($next, '');
-        }
+        $phpcsFile->addError($error, $next, 'LeadingSlash');
 
     }//end process()
 

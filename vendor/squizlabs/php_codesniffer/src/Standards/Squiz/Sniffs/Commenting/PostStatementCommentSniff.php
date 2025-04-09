@@ -4,13 +4,13 @@
  *
  * @author    Greg Sherwood <gsherwood@squiz.net>
  * @copyright 2006-2015 Squiz Pty Ltd (ABN 77 084 670 600)
- * @license   https://github.com/PHPCSStandards/PHP_CodeSniffer/blob/master/licence.txt BSD Licence
+ * @license   https://github.com/squizlabs/PHP_CodeSniffer/blob/master/licence.txt BSD Licence
  */
 
 namespace PHP_CodeSniffer\Standards\Squiz\Sniffs\Commenting;
 
-use PHP_CodeSniffer\Files\File;
 use PHP_CodeSniffer\Sniffs\Sniff;
+use PHP_CodeSniffer\Files\File;
 
 class PostStatementCommentSniff implements Sniff
 {
@@ -40,14 +40,13 @@ class PostStatementCommentSniff implements Sniff
         T_WHILE   => true,
         T_FOR     => true,
         T_FOREACH => true,
-        T_MATCH   => true,
     ];
 
 
     /**
      * Returns an array of tokens this test wants to listen for.
      *
-     * @return array<int|string>
+     * @return array
      */
     public function register()
     {
@@ -107,14 +106,6 @@ class PostStatementCommentSniff implements Sniff
                     return;
                 }
             }
-        }
-
-        if ($phpcsFile->tokenizerType === 'PHP'
-            && preg_match('|^//[ \t]*@[^\s]+|', $tokens[$stackPtr]['content']) === 1
-        ) {
-            $error = 'Annotations may not appear after statements';
-            $phpcsFile->addError($error, $stackPtr, 'AnnotationFound');
-            return;
         }
 
         $error = 'Comments may not appear after statements';

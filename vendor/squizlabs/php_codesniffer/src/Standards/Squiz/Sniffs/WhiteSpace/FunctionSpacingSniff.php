@@ -4,13 +4,13 @@
  *
  * @author    Greg Sherwood <gsherwood@squiz.net>
  * @copyright 2006-2015 Squiz Pty Ltd (ABN 77 084 670 600)
- * @license   https://github.com/PHPCSStandards/PHP_CodeSniffer/blob/master/licence.txt BSD Licence
+ * @license   https://github.com/squizlabs/PHP_CodeSniffer/blob/master/licence.txt BSD Licence
  */
 
 namespace PHP_CodeSniffer\Standards\Squiz\Sniffs\WhiteSpace;
 
-use PHP_CodeSniffer\Files\File;
 use PHP_CodeSniffer\Sniffs\Sniff;
+use PHP_CodeSniffer\Files\File;
 use PHP_CodeSniffer\Util\Tokens;
 
 class FunctionSpacingSniff implements Sniff
@@ -48,7 +48,7 @@ class FunctionSpacingSniff implements Sniff
     /**
      * Returns an array of tokens this test wants to listen for.
      *
-     * @return array<int|string>
+     * @return array
      */
     public function register()
     {
@@ -112,54 +112,14 @@ class FunctionSpacingSniff implements Sniff
         $isFirst = false;
         $isLast  = false;
 
-        $ignore = ([T_WHITESPACE => T_WHITESPACE] + Tokens::$methodPrefixes);
+        $ignore = (Tokens::$emptyTokens + Tokens::$methodPrefixes);
 
         $prev = $phpcsFile->findPrevious($ignore, ($stackPtr - 1), null, true);
-
-        $startOfDeclarationLine = $phpcsFile->findNext(T_WHITESPACE, ($prev + 1), null, true);
-        for ($i = $startOfDeclarationLine; $i >= 0; $i--) {
-            if ($tokens[$i]['line'] === $tokens[$startOfDeclarationLine]['line']) {
-                $startOfDeclarationLine = $i;
-                continue;
-            }
-
-            break;
-        }
-
-        // Skip past function docblocks and attributes.
-        $prev = $startOfDeclarationLine;
-        if ($startOfDeclarationLine > 0) {
-            for ($prev = ($startOfDeclarationLine - 1); $prev > 0; $prev--) {
-                if ($tokens[$prev]['code'] === T_WHITESPACE) {
-                    continue;
-                }
-
-                if ($tokens[$prev]['code'] === T_DOC_COMMENT_CLOSE_TAG) {
-                    $prev = $tokens[$prev]['comment_opener'];
-                    continue;
-                }
-
-                if ($tokens[$prev]['code'] === T_ATTRIBUTE_END) {
-                    $prev = $tokens[$prev]['attribute_opener'];
-                    continue;
-                }
-
-                break;
-            }
-        }
-
         if ($tokens[$prev]['code'] === T_OPEN_CURLY_BRACKET) {
             $isFirst = true;
         }
 
         $next = $phpcsFile->findNext($ignore, ($closer + 1), null, true);
-        if (isset(Tokens::$emptyTokens[$tokens[$next]['code']]) === true
-            && $tokens[$next]['line'] === $tokens[$closer]['line']
-        ) {
-            // Skip past "end" comments.
-            $next = $phpcsFile->findNext($ignore, ($next + 1), null, true);
-        }
-
         if ($tokens[$next]['code'] === T_CLOSE_CURLY_BRACKET) {
             $isLast = true;
         }
@@ -171,12 +131,6 @@ class FunctionSpacingSniff implements Sniff
 
         // Allow for comments on the same line as the closer.
         for ($nextLineToken = ($closer + 1); $nextLineToken < $phpcsFile->numTokens; $nextLineToken++) {
-            // A doc comment belongs to the next statement and must not be on
-            // this line.
-            if ($tokens[$nextLineToken]['code'] === T_DOC_COMMENT_OPEN_TAG) {
-                break;
-            }
-
             if ($tokens[$nextLineToken]['line'] !== $tokens[$closer]['line']) {
                 break;
             }
@@ -246,11 +200,9 @@ class FunctionSpacingSniff implements Sniff
             before the function.
         */
 
-        $startOfPreamble = $phpcsFile->findNext(T_WHITESPACE, ($prev + 1), null, true);
-
         $prevLineToken = null;
-        for ($i = $startOfPreamble; $i >= 0; $i--) {
-            if ($tokens[$i]['line'] === $tokens[$startOfPreamble]['line']) {
+        for ($i = $stackPtr; $i >= 0; $i--) {
+            if ($tokens[$i]['line'] === $tokens[$stackPtr]['line']) {
                 continue;
             }
 
@@ -265,44 +217,51 @@ class FunctionSpacingSniff implements Sniff
             $prevContent   = 0;
             $prevLineToken = 0;
         } else {
-            $firstBefore = $phpcsFile->findPrevious(T_WHITESPACE, ($startOfDeclarationLine - 1), null, true);
-            if ($tokens[$firstBefore]['code'] === T_COMMENT
-                || isset(Tokens::$phpcsCommentTokens[$tokens[$firstBefore]['code']]) === true
+            $currentLine = $tokens[$stackPtr]['line'];
+
+            $prevContent = $phpcsFile->findPrevious(T_WHITESPACE, $prevLineToken, null, true);
+
+            if ($tokens[$prevContent]['code'] === T_COMMENT
+                || isset(Tokens::$phpcsCommentTokens[$tokens[$prevContent]['code']]) === true
             ) {
                 // Ignore comments as they can have different spacing rules, and this
                 // isn't a proper function comment anyway.
                 return;
             }
 
+            if ($tokens[$prevContent]['code'] === T_DOC_COMMENT_CLOSE_TAG
+                && $tokens[$prevContent]['line'] === ($currentLine - 1)
+            ) {
+                // Account for function comments.
+                $prevContent = $phpcsFile->findPrevious(T_WHITESPACE, ($tokens[$prevContent]['comment_opener'] - 1), null, true);
+            }
+
+            $prevLineToken = $prevContent;
+
             // Before we throw an error, check that we are not throwing an error
             // for another function. We don't want to error for no blank lines after
             // the previous function and no blank lines before this one as well.
+            $prevLine   = ($tokens[$prevContent]['line'] - 1);
+            $i          = ($stackPtr - 1);
+            $foundLines = 0;
+
             $stopAt = 0;
-            if (isset($tokens[$prevLineToken]['conditions']) === true) {
-                $conditions = $tokens[$prevLineToken]['conditions'];
+            if (isset($tokens[$stackPtr]['conditions']) === true) {
+                $conditions = $tokens[$stackPtr]['conditions'];
                 $conditions = array_keys($conditions);
                 $stopAt     = array_pop($conditions);
             }
 
-            $currentLine = $tokens[$startOfPreamble]['line'];
-            $prevContent = $prev;
-            $prevLine    = ($tokens[$prevContent]['line'] - 1);
-            $foundLines  = ($currentLine - $tokens[$prevContent]['line'] - 1);
-
-            for ($i = $prevContent; $i > $stopAt; $i--) {
-                if ($tokens[$i]['code'] === T_CLOSE_CURLY_BRACKET) {
-                    if (isset($tokens[$i]['scope_condition']) === true
-                        && $tokens[$tokens[$i]['scope_condition']]['code'] === T_FUNCTION
-                    ) {
-                        // Found a previous function.
-                        return;
-                    } else {
-                        break;
-                    }
-                }
-
+            while ($currentLine !== $prevLine && $currentLine > 1 && $i > $stopAt) {
                 if ($tokens[$i]['code'] === T_FUNCTION) {
                     // Found another interface or abstract function.
+                    return;
+                }
+
+                if ($tokens[$i]['code'] === T_CLOSE_CURLY_BRACKET
+                    && $tokens[$tokens[$i]['scope_condition']]['code'] === T_FUNCTION
+                ) {
+                    // Found a previous function.
                     return;
                 }
 
@@ -310,7 +269,16 @@ class FunctionSpacingSniff implements Sniff
                 if ($currentLine === $prevLine) {
                     break;
                 }
-            }//end for
+
+                if ($tokens[($i - 1)]['line'] < $currentLine && $tokens[($i + 1)]['line'] > $currentLine) {
+                    // This token is on a line by itself. If it is whitespace, the line is empty.
+                    if ($tokens[$i]['code'] === T_WHITESPACE) {
+                        $foundLines++;
+                    }
+                }
+
+                $i--;
+            }//end while
         }//end if
 
         $requiredSpacing = $this->spacing;

@@ -4,19 +4,14 @@
  *
  * @author    Greg Sherwood <gsherwood@squiz.net>
  * @copyright 2006-2015 Squiz Pty Ltd (ABN 77 084 670 600)
- * @license   https://github.com/PHPCSStandards/PHP_CodeSniffer/blob/master/licence.txt BSD Licence
+ * @license   https://github.com/squizlabs/PHP_CodeSniffer/blob/master/licence.txt BSD Licence
  */
 
 namespace PHP_CodeSniffer\Standards\PSR1\Tests\Files;
 
 use PHP_CodeSniffer\Tests\Standards\AbstractSniffUnitTest;
 
-/**
- * Unit test class for the SideEffects sniff.
- *
- * @covers \PHP_CodeSniffer\Standards\PSR1\Sniffs\Files\SideEffectsSniff
- */
-final class SideEffectsUnitTest extends AbstractSniffUnitTest
+class SideEffectsUnitTest extends AbstractSniffUnitTest
 {
 
 
@@ -72,8 +67,6 @@ final class SideEffectsUnitTest extends AbstractSniffUnitTest
         case 'SideEffectsUnitTest.5.inc':
         case 'SideEffectsUnitTest.10.inc':
         case 'SideEffectsUnitTest.12.inc':
-        case 'SideEffectsUnitTest.15.inc':
-        case 'SideEffectsUnitTest.16.inc':
             return [1 => 1];
         default:
             return [];

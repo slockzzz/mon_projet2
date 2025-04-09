@@ -4,15 +4,15 @@
  *
  * @author    Greg Sherwood <gsherwood@squiz.net>
  * @copyright 2006-2015 Squiz Pty Ltd (ABN 77 084 670 600)
- * @license   https://github.com/PHPCSStandards/PHP_CodeSniffer/blob/master/licence.txt BSD Licence
+ * @license   https://github.com/squizlabs/PHP_CodeSniffer/blob/master/licence.txt BSD Licence
  */
 
 namespace PHP_CodeSniffer\Standards\Generic\Sniffs\NamingConventions;
 
-use PHP_CodeSniffer\Files\File;
 use PHP_CodeSniffer\Sniffs\AbstractScopeSniff;
 use PHP_CodeSniffer\Util\Common;
 use PHP_CodeSniffer\Util\Tokens;
+use PHP_CodeSniffer\Files\File;
 
 class CamelCapsFunctionNameSniff extends AbstractScopeSniff
 {
@@ -23,23 +23,21 @@ class CamelCapsFunctionNameSniff extends AbstractScopeSniff
      * @var array
      */
     protected $magicMethods = [
-        'construct'   => true,
-        'destruct'    => true,
-        'call'        => true,
-        'callstatic'  => true,
-        'get'         => true,
-        'set'         => true,
-        'isset'       => true,
-        'unset'       => true,
-        'sleep'       => true,
-        'wakeup'      => true,
-        'serialize'   => true,
-        'unserialize' => true,
-        'tostring'    => true,
-        'invoke'      => true,
-        'set_state'   => true,
-        'clone'       => true,
-        'debuginfo'   => true,
+        'construct'  => true,
+        'destruct'   => true,
+        'call'       => true,
+        'callstatic' => true,
+        'get'        => true,
+        'set'        => true,
+        'isset'      => true,
+        'unset'      => true,
+        'sleep'      => true,
+        'wakeup'     => true,
+        'tostring'   => true,
+        'set_state'  => true,
+        'clone'      => true,
+        'invoke'     => true,
+        'debuginfo'  => true,
     ];
 
     /**
@@ -113,7 +111,7 @@ class CamelCapsFunctionNameSniff extends AbstractScopeSniff
 
         $methodName = $phpcsFile->getDeclarationName($stackPtr);
         if ($methodName === null) {
-            // Live coding or parse error. Bow out.
+            // Ignore closures.
             return;
         }
 
@@ -150,7 +148,7 @@ class CamelCapsFunctionNameSniff extends AbstractScopeSniff
             return;
         }
 
-        // Ignore leading underscores in the method name.
+        // Ignore first underscore in methods prefixed with "_".
         $methodName = ltrim($methodName, '_');
 
         $methodProps = $phpcsFile->getMethodProperties($stackPtr);
@@ -168,6 +166,7 @@ class CamelCapsFunctionNameSniff extends AbstractScopeSniff
             }
 
             $phpcsFile->recordMetric($stackPtr, 'CamelCase method name', 'no');
+            return;
         } else {
             $phpcsFile->recordMetric($stackPtr, 'CamelCase method name', 'yes');
         }
@@ -188,7 +187,7 @@ class CamelCapsFunctionNameSniff extends AbstractScopeSniff
     {
         $functionName = $phpcsFile->getDeclarationName($stackPtr);
         if ($functionName === null) {
-            // Live coding or parse error. Bow out.
+            // Ignore closures.
             return;
         }
 
@@ -205,7 +204,7 @@ class CamelCapsFunctionNameSniff extends AbstractScopeSniff
             $phpcsFile->addError($error, $stackPtr, 'FunctionDoubleUnderscore', $errorData);
         }
 
-        // Ignore leading underscores in the method name.
+        // Ignore first underscore in functions prefixed with "_".
         $functionName = ltrim($functionName, '_');
 
         if (Common::isCamelCaps($functionName, false, true, $this->strict) === false) {

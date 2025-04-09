@@ -4,19 +4,14 @@
  *
  * @author    Greg Sherwood <gsherwood@squiz.net>
  * @copyright 2006-2015 Squiz Pty Ltd (ABN 77 084 670 600)
- * @license   https://github.com/PHPCSStandards/PHP_CodeSniffer/blob/master/licence.txt BSD Licence
+ * @license   https://github.com/squizlabs/PHP_CodeSniffer/blob/master/licence.txt BSD Licence
  */
 
 namespace PHP_CodeSniffer\Standards\PEAR\Tests\NamingConventions;
 
 use PHP_CodeSniffer\Tests\Standards\AbstractSniffUnitTest;
 
-/**
- * Unit test class for the ValidFunctionName sniff.
- *
- * @covers \PHP_CodeSniffer\Standards\PEAR\Sniffs\NamingConventions\ValidFunctionNameSniff
- */
-final class ValidFunctionNameUnitTest extends AbstractSniffUnitTest
+class ValidFunctionNameUnitTest extends AbstractSniffUnitTest
 {
 
 
@@ -127,10 +122,6 @@ final class ValidFunctionNameUnitTest extends AbstractSniffUnitTest
             212 => 1,
             213 => 1,
             214 => 1,
-            235 => 1,
-            236 => 2,
-            239 => 1,
-            242 => 1,
         ];
 
     }//end getErrorList()

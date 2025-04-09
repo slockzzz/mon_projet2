@@ -4,19 +4,14 @@
  *
  * @author    Greg Sherwood <gsherwood@squiz.net>
  * @copyright 2006-2015 Squiz Pty Ltd (ABN 77 084 670 600)
- * @license   https://github.com/PHPCSStandards/PHP_CodeSniffer/blob/master/licence.txt BSD Licence
+ * @license   https://github.com/squizlabs/PHP_CodeSniffer/blob/master/licence.txt BSD Licence
  */
 
 namespace PHP_CodeSniffer\Standards\Generic\Tests\ControlStructures;
 
 use PHP_CodeSniffer\Tests\Standards\AbstractSniffUnitTest;
 
-/**
- * Unit test class for the DisallowYodaConditions sniff.
- *
- * @covers \PHP_CodeSniffer\Standards\Generic\Sniffs\ControlStructures\DisallowYodaConditionsSniff
- */
-final class DisallowYodaConditionsUnitTest extends AbstractSniffUnitTest
+class DisallowYodaConditionsUnitTest extends AbstractSniffUnitTest
 {
 
 
@@ -53,25 +48,15 @@ final class DisallowYodaConditionsUnitTest extends AbstractSniffUnitTest
             97  => 3,
             98  => 3,
             105 => 1,
+            119 => 1,
+            120 => 1,
+            122 => 1,
+            123 => 1,
             128 => 1,
             129 => 2,
             130 => 1,
             131 => 1,
             133 => 1,
-            139 => 1,
-            140 => 1,
-            141 => 1,
-            142 => 1,
-            156 => 1,
-            160 => 1,
-            167 => 1,
-            173 => 1,
-            174 => 1,
-            183 => 1,
-            184 => 1,
-            185 => 1,
-            186 => 1,
-            187 => 1,
         ];
 
     }//end getErrorList()

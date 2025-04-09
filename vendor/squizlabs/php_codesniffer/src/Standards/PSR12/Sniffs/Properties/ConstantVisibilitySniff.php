@@ -4,13 +4,13 @@
  *
  * @author    Greg Sherwood <gsherwood@squiz.net>
  * @copyright 2006-2019 Squiz Pty Ltd (ABN 77 084 670 600)
- * @license   https://github.com/PHPCSStandards/PHP_CodeSniffer/blob/master/licence.txt BSD Licence
+ * @license   https://github.com/squizlabs/PHP_CodeSniffer/blob/master/licence.txt BSD Licence
  */
 
 namespace PHP_CodeSniffer\Standards\PSR12\Sniffs\Properties;
 
-use PHP_CodeSniffer\Files\File;
 use PHP_CodeSniffer\Sniffs\Sniff;
+use PHP_CodeSniffer\Files\File;
 use PHP_CodeSniffer\Util\Tokens;
 
 class ConstantVisibilitySniff implements Sniff
@@ -20,7 +20,7 @@ class ConstantVisibilitySniff implements Sniff
     /**
      * Returns an array of tokens this test wants to listen for.
      *
-     * @return array<int|string>
+     * @return array
      */
     public function register()
     {
@@ -41,16 +41,7 @@ class ConstantVisibilitySniff implements Sniff
     public function process(File $phpcsFile, $stackPtr)
     {
         $tokens = $phpcsFile->getTokens();
-
-        // Make sure this is a class constant.
-        if ($phpcsFile->hasCondition($stackPtr, Tokens::$ooScopeTokens) === false) {
-            return;
-        }
-
-        $ignore   = Tokens::$emptyTokens;
-        $ignore[] = T_FINAL;
-
-        $prev = $phpcsFile->findPrevious($ignore, ($stackPtr - 1), null, true);
+        $prev   = $phpcsFile->findPrevious(Tokens::$emptyTokens, ($stackPtr - 1), null, true);
         if (isset(Tokens::$scopeModifiers[$tokens[$prev]['code']]) === true) {
             return;
         }

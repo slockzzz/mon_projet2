@@ -4,17 +4,14 @@
  *
  * @author    Roman Levishchenko <index.0h@gmail.com>
  * @copyright 2013-2014 Roman Levishchenko
- * @license   https://github.com/PHPCSStandards/PHP_CodeSniffer/blob/master/licence.txt BSD Licence
- *
- * @deprecated 3.9.0
+ * @license   https://github.com/squizlabs/PHP_CodeSniffer/blob/master/licence.txt BSD Licence
  */
 
 namespace PHP_CodeSniffer\Standards\Generic\Sniffs\Debug;
 
-use PHP_CodeSniffer\Config;
-use PHP_CodeSniffer\Files\File;
 use PHP_CodeSniffer\Sniffs\Sniff;
-use PHP_CodeSniffer\Util\Common;
+use PHP_CodeSniffer\Files\File;
+use PHP_CodeSniffer\Config;
 
 class CSSLintSniff implements Sniff
 {
@@ -30,7 +27,7 @@ class CSSLintSniff implements Sniff
     /**
      * Returns the token types that this sniff is interested in.
      *
-     * @return array<int|string>
+     * @return int[]
      */
     public function register()
     {
@@ -46,22 +43,22 @@ class CSSLintSniff implements Sniff
      * @param int                         $stackPtr  The position in the stack where
      *                                               the token was found.
      *
-     * @return int
+     * @return void
      */
     public function process(File $phpcsFile, $stackPtr)
     {
         $csslintPath = Config::getExecutablePath('csslint');
         if ($csslintPath === null) {
-            return $phpcsFile->numTokens;
+            return;
         }
 
         $fileName = $phpcsFile->getFilename();
 
-        $cmd = Common::escapeshellcmd($csslintPath).' '.escapeshellarg($fileName).' 2>&1';
+        $cmd = escapeshellcmd($csslintPath).' '.escapeshellarg($fileName).' 2>&1';
         exec($cmd, $output, $retval);
 
         if (is_array($output) === false) {
-            return $phpcsFile->numTokens;
+            return;
         }
 
         $count = count($output);
@@ -90,7 +87,7 @@ class CSSLintSniff implements Sniff
         }//end for
 
         // Ignore the rest of the file.
-        return $phpcsFile->numTokens;
+        return ($phpcsFile->numTokens + 1);
 
     }//end process()
 

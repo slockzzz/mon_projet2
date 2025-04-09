@@ -4,19 +4,14 @@
  *
  * @author    Greg Sherwood <gsherwood@squiz.net>
  * @copyright 2006-2019 Squiz Pty Ltd (ABN 77 084 670 600)
- * @license   https://github.com/PHPCSStandards/PHP_CodeSniffer/blob/master/licence.txt BSD Licence
+ * @license   https://github.com/squizlabs/PHP_CodeSniffer/blob/master/licence.txt BSD Licence
  */
 
 namespace PHP_CodeSniffer\Standards\PSR12\Tests\Files;
 
 use PHP_CodeSniffer\Tests\Standards\AbstractSniffUnitTest;
 
-/**
- * Unit test class for the FileHeader sniff.
- *
- * @covers \PHP_CodeSniffer\Standards\PSR12\Sniffs\Files\FileHeaderSniff
- */
-final class FileHeaderUnitTest extends AbstractSniffUnitTest
+class FileHeaderUnitTest extends AbstractSniffUnitTest
 {
 
 
@@ -36,11 +31,10 @@ final class FileHeaderUnitTest extends AbstractSniffUnitTest
         case 'FileHeaderUnitTest.2.inc':
             return [
                 1  => 1,
-                6  => 1,
-                7  => 1,
-                18 => 1,
-                20 => 1,
-                24 => 1,
+                8  => 1,
+                19 => 1,
+                21 => 1,
+                25 => 1,
             ];
         case 'FileHeaderUnitTest.3.inc':
             return [
@@ -56,12 +50,6 @@ final class FileHeaderUnitTest extends AbstractSniffUnitTest
             ];
         case 'FileHeaderUnitTest.5.inc':
             return [4 => 1];
-        case 'FileHeaderUnitTest.7.inc':
-        case 'FileHeaderUnitTest.10.inc':
-        case 'FileHeaderUnitTest.11.inc':
-            return [1 => 1];
-        case 'FileHeaderUnitTest.12.inc':
-            return [4 => 2];
         default:
             return [];
         }//end switch

@@ -10,6 +10,7 @@ $foo = [
         3
        ];
 $var = /*comment*/[1,2,3];
+$var = array;
 
 function foo(array $array) {}
 
@@ -20,14 +21,3 @@ abstract function foo(): array;
 abstract function foo(): Foo\Bar;
 
 abstract function foo(): \Foo\Bar;
-
-array_map(
-    static fn (array $value): array => array_filter($value),
-    []
-);
-
-class Foo {
-    function array() {}
-}
-
-$obj->array( 1, 2, 3 );

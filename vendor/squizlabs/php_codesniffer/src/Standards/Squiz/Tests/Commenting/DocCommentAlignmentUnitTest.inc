@@ -31,7 +31,7 @@ class MyClass
  * Some info about the class here
   *
 */
-readonly class MyClass
+class MyClass
 {
     /**
      * Some info about the function here.
@@ -75,26 +75,6 @@ class MyClass2
        * Some info about the variable here.
      */
     var $x;
-}
-
-abstract class MyClass
-{
-    /**
-* Property comment
-   */
-    readonly public string $prop;
-}
-
-/**
- * Some info about the enum here
-  *
-*/
-enum Suits: string
-{
-    /**
-      * Some info about the case here.
-       */
-    case HEARTS;
 }
 
 /** ************************************************************************

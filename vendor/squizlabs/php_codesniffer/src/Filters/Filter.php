@@ -4,20 +4,16 @@
  *
  * @author    Greg Sherwood <gsherwood@squiz.net>
  * @copyright 2006-2015 Squiz Pty Ltd (ABN 77 084 670 600)
- * @license   https://github.com/PHPCSStandards/PHP_CodeSniffer/blob/master/licence.txt BSD Licence
+ * @license   https://github.com/squizlabs/PHP_CodeSniffer/blob/master/licence.txt BSD Licence
  */
 
 namespace PHP_CodeSniffer\Filters;
 
-use FilesystemIterator;
-use PHP_CodeSniffer\Config;
+use PHP_CodeSniffer\Util;
 use PHP_CodeSniffer\Ruleset;
-use PHP_CodeSniffer\Util\Common;
-use RecursiveDirectoryIterator;
-use RecursiveFilterIterator;
-use ReturnTypeWillChange;
+use PHP_CodeSniffer\Config;
 
-class Filter extends RecursiveFilterIterator
+class Filter extends \RecursiveFilterIterator
 {
 
     /**
@@ -93,11 +89,10 @@ class Filter extends RecursiveFilterIterator
      *
      * @return bool
      */
-    #[ReturnTypeWillChange]
     public function accept()
     {
         $filePath = $this->current();
-        $realPath = Common::realpath($filePath);
+        $realPath = Util\Common::realpath($filePath);
 
         if ($realPath !== false) {
             // It's a real path somewhere, so record it
@@ -135,12 +130,10 @@ class Filter extends RecursiveFilterIterator
      *
      * @return \RecursiveIterator
      */
-    #[ReturnTypeWillChange]
     public function getChildren()
     {
-        $filterClass = get_called_class();
-        $children    = new $filterClass(
-            new RecursiveDirectoryIterator($this->current(), (RecursiveDirectoryIterator::SKIP_DOTS | FilesystemIterator::FOLLOW_SYMLINKS)),
+        $children = new static(
+            new \RecursiveDirectoryIterator($this->current(), (\RecursiveDirectoryIterator::SKIP_DOTS | \FilesystemIterator::FOLLOW_SYMLINKS)),
             $this->basedir,
             $this->config,
             $this->ruleset
@@ -179,7 +172,7 @@ class Filter extends RecursiveFilterIterator
         // complete extension list and make sure one is allowed.
         $extensions = [];
         array_shift($fileParts);
-        while (empty($fileParts) === false) {
+        foreach ($fileParts as $part) {
             $extensions[implode('.', $fileParts)] = 1;
             array_shift($fileParts);
         }
@@ -224,7 +217,7 @@ class Filter extends RecursiveFilterIterator
                     // Need to check this pattern for dirs as well as individual file paths.
                     $this->ignoreFilePatterns[$pattern] = $type;
 
-                    $pattern = substr($pattern, 0, -2).'(?=/|$)';
+                    $pattern = substr($pattern, 0, -2);
                     $this->ignoreDirPatterns[$pattern] = $type;
                 } else {
                     // This is a file-specific pattern, so only need to check this

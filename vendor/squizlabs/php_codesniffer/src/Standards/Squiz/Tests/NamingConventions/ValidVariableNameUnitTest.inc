@@ -142,16 +142,3 @@ $anonClass = new class() {
     }
 };
 
-echo $obj?->varName;
-echo $obj?->var_name;
-echo $obj?->varname;
-echo $obj?->_varName;
-
-enum SomeEnum
-{
-    public function foo($foo, $_foo, $foo_bar) {
-        $bar = 1;
-        $_bar = 2;
-        $bar_foo = 3;
-    }
-}

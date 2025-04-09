@@ -6,25 +6,18 @@
  *
  * @author    Greg Sherwood <gsherwood@squiz.net>
  * @copyright 2006-2015 Squiz Pty Ltd (ABN 77 084 670 600)
- * @license   https://github.com/PHPCSStandards/PHP_CodeSniffer/blob/master/licence.txt BSD Licence
+ * @license   https://github.com/squizlabs/PHP_CodeSniffer/blob/master/licence.txt BSD Licence
  */
 
 namespace PHP_CodeSniffer\Files;
 
-use Countable;
-use FilesystemIterator;
-use Iterator;
 use PHP_CodeSniffer\Autoload;
+use PHP_CodeSniffer\Util;
+use PHP_CodeSniffer\Ruleset;
 use PHP_CodeSniffer\Config;
 use PHP_CodeSniffer\Exceptions\DeepExitException;
-use PHP_CodeSniffer\Ruleset;
-use PHP_CodeSniffer\Util\Common;
-use RecursiveArrayIterator;
-use RecursiveDirectoryIterator;
-use RecursiveIteratorIterator;
-use ReturnTypeWillChange;
 
-class FileList implements Iterator, Countable
+class FileList implements \Iterator, \Countable
 {
 
     /**
@@ -78,7 +71,7 @@ class FileList implements Iterator, Countable
 
         $paths = $config->files;
         foreach ($paths as $path) {
-            $isPharFile = Common::isPharFile($path);
+            $isPharFile = Util\Common::isPharFile($path);
             if (is_dir($path) === true || $isPharFile === true) {
                 if ($isPharFile === true) {
                     $path = 'phar://'.$path;
@@ -86,9 +79,9 @@ class FileList implements Iterator, Countable
 
                 $filterClass = $this->getFilterClass();
 
-                $di       = new RecursiveDirectoryIterator($path, (RecursiveDirectoryIterator::SKIP_DOTS | FilesystemIterator::FOLLOW_SYMLINKS));
+                $di       = new \RecursiveDirectoryIterator($path, (\RecursiveDirectoryIterator::SKIP_DOTS | \FilesystemIterator::FOLLOW_SYMLINKS));
                 $filter   = new $filterClass($di, $path, $config, $ruleset);
-                $iterator = new RecursiveIteratorIterator($filter);
+                $iterator = new \RecursiveIteratorIterator($filter);
 
                 foreach ($iterator as $file) {
                     $this->files[$file->getPathname()] = null;
@@ -127,9 +120,9 @@ class FileList implements Iterator, Countable
 
         $filterClass = $this->getFilterClass();
 
-        $di       = new RecursiveArrayIterator([$path]);
+        $di       = new \RecursiveArrayIterator([$path]);
         $filter   = new $filterClass($di, $path, $this->config, $this->ruleset);
-        $iterator = new RecursiveIteratorIterator($filter);
+        $iterator = new \RecursiveIteratorIterator($filter);
 
         foreach ($iterator as $path) {
             $this->files[$path] = $file;
@@ -176,7 +169,6 @@ class FileList implements Iterator, Countable
      *
      * @return void
      */
-    #[ReturnTypeWillChange]
     public function rewind()
     {
         reset($this->files);
@@ -189,11 +181,10 @@ class FileList implements Iterator, Countable
      *
      * @return \PHP_CodeSniffer\Files\File
      */
-    #[ReturnTypeWillChange]
     public function current()
     {
         $path = key($this->files);
-        if (isset($this->files[$path]) === false) {
+        if ($this->files[$path] === null) {
             $this->files[$path] = new LocalFile($path, $this->ruleset, $this->config);
         }
 
@@ -205,9 +196,8 @@ class FileList implements Iterator, Countable
     /**
      * Return the file path of the current file being processed.
      *
-     * @return string|null Path name or `null` when the end of the iterator has been reached.
+     * @return void
      */
-    #[ReturnTypeWillChange]
     public function key()
     {
         return key($this->files);
@@ -220,7 +210,6 @@ class FileList implements Iterator, Countable
      *
      * @return void
      */
-    #[ReturnTypeWillChange]
     public function next()
     {
         next($this->files);
@@ -233,7 +222,6 @@ class FileList implements Iterator, Countable
      *
      * @return boolean
      */
-    #[ReturnTypeWillChange]
     public function valid()
     {
         if (current($this->files) === false) {
@@ -250,7 +238,6 @@ class FileList implements Iterator, Countable
      *
      * @return integer
      */
-    #[ReturnTypeWillChange]
     public function count()
     {
         return $this->numFiles;

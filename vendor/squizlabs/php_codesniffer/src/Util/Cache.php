@@ -4,18 +4,14 @@
  *
  * @author    Greg Sherwood <gsherwood@squiz.net>
  * @copyright 2006-2015 Squiz Pty Ltd (ABN 77 084 670 600)
- * @license   https://github.com/PHPCSStandards/PHP_CodeSniffer/blob/master/licence.txt BSD Licence
+ * @license   https://github.com/squizlabs/PHP_CodeSniffer/blob/master/licence.txt BSD Licence
  */
 
 namespace PHP_CodeSniffer\Util;
 
-use FilesystemIterator;
 use PHP_CodeSniffer\Autoload;
 use PHP_CodeSniffer\Config;
 use PHP_CodeSniffer\Ruleset;
-use RecursiveCallbackFilterIterator;
-use RecursiveDirectoryIterator;
-use RecursiveIteratorIterator;
 
 class Cache
 {
@@ -23,7 +19,7 @@ class Cache
     /**
      * The filesystem location of the cache file.
      *
-     * @var string
+     * @var void
      */
     private static $path = '';
 
@@ -99,25 +95,22 @@ class Cache
         // hash. This ensures that core PHPCS changes will also invalidate the cache.
         // Note that we ignore sniffs here, and any files that don't affect
         // the outcome of the run.
-        $di     = new RecursiveDirectoryIterator(
-            $installDir,
-            (FilesystemIterator::KEY_AS_PATHNAME | FilesystemIterator::CURRENT_AS_FILEINFO | FilesystemIterator::SKIP_DOTS)
-        );
-        $filter = new RecursiveCallbackFilterIterator(
+        $di     = new \RecursiveDirectoryIterator($installDir);
+        $filter = new \RecursiveCallbackFilterIterator(
             $di,
             function ($file, $key, $iterator) {
-                // Skip non-php files.
+                // Skip hidden files.
                 $filename = $file->getFilename();
-                if ($file->isFile() === true && substr($filename, -4) !== '.php') {
+                if (substr($filename, 0, 1) === '.') {
                     return false;
                 }
 
-                $filePath = Common::realpath($key);
+                $filePath = Common::realpath($file->getPathname());
                 if ($filePath === false) {
                     return false;
                 }
 
-                if ($iterator->hasChildren() === true
+                if (is_dir($filePath) === true
                     && ($filename === 'Standards'
                     || $filename === 'Exceptions'
                     || $filename === 'Reports'
@@ -130,7 +123,7 @@ class Cache
             }
         );
 
-        $iterator = new RecursiveIteratorIterator($filter);
+        $iterator = new \RecursiveIteratorIterator($filter);
         foreach ($iterator as $file) {
             if (PHP_CODESNIFFER_VERBOSITY > 1) {
                 echo "\t\t=> core file: $file".PHP_EOL;
@@ -150,18 +143,16 @@ class Cache
         // Along with the code hash, use various settings that can affect
         // the results of a run to create a new hash. This hash will be used
         // in the cache file name.
-        $rulesetHash       = md5(var_export($ruleset->ignorePatterns, true).var_export($ruleset->includePatterns, true));
-        $phpExtensionsHash = md5(var_export(get_loaded_extensions(), true));
-        $configData        = [
-            'phpVersion'    => PHP_VERSION_ID,
-            'phpExtensions' => $phpExtensionsHash,
-            'tabWidth'      => $config->tabWidth,
-            'encoding'      => $config->encoding,
-            'recordErrors'  => $config->recordErrors,
-            'annotations'   => $config->annotations,
-            'configData'    => Config::getAllConfigData(),
-            'codeHash'      => $codeHash,
-            'rulesetHash'   => $rulesetHash,
+        $rulesetHash = md5(var_export($ruleset->ignorePatterns, true).var_export($ruleset->includePatterns, true));
+        $configData  = [
+            'phpVersion'   => PHP_VERSION_ID,
+            'tabWidth'     => $config->tabWidth,
+            'encoding'     => $config->encoding,
+            'recordErrors' => $config->recordErrors,
+            'annotations'  => $config->annotations,
+            'configData'   => Config::getAllConfigData(),
+            'codeHash'     => $codeHash,
+            'rulesetHash'  => $rulesetHash,
         ];
 
         $configString = var_export($configData, true);
