@@ -22,18 +22,18 @@ jobs:
           php-version: '8.3'
 
       - name: Install dependencies
-        run: |
+        run:
           composer install --no-dev
 
       - name: Ensure phpcs has execute permissions
-        run: |
-          chmod +x vendor/bin/phpcs
-          ls -l vendor/bin/phpcs # Vérifie les permissions du fichier
+        run:
+          chmod -R +x vendor/bin # Appliquer les permissions d'exécution à tout le dossier vendor/bin
+          ls -l vendor/bin/phpcs # Vérifier les permissions du fichier php cs
 
       - name: Run PHPCS linting
-        run: |
+        run:
           vendor/bin/phpcs --standard=PSR2 src/MesDates.php
 
       - name: Run PHPUnit tests
-        run: |
+        run:
           vendor/bin/phpunit
