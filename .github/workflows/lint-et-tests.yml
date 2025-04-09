@@ -25,13 +25,15 @@ jobs:
         run: |
           composer install --no-dev
 
-      - name: Make phpcs executable
-        run: chmod +x vendor/bin/phpcs
+      - name: Verify PHPCS installation and permissions
+        run: |
+          ls -l vendor/bin/phpcs
+          chmod +x vendor/bin/phpcs || true  # In case phpcs is already executable, avoid error
 
       - name: Run PHPCS linting
         run: |
-          vendor/bin/phpcs --standard=PSR2 src/MesDates.php
+          ./vendor/bin/phpcs --standard=PSR2 src/MesDates.php
 
       - name: Run PHPUnit tests
         run: |
-          vendor/bin/phpunit
+          ./vendor/bin/phpunit
