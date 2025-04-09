@@ -19,21 +19,19 @@ jobs:
       - name: Set up PHP
         uses: shivammathur/setup-php@v2
         with:
-          php-version: '8.3.11'
+          php-version: '8.3'
 
       - name: Install dependencies
         run: |
           composer install --no-dev
 
-      - name: Verify and fix PHPCS permissions
-        run: |
-          ls -l vendor/bin/phpcs  # Check the file permissions
-          sudo chmod +x vendor/bin/phpcs  # Make sure it is executable
+      - name: Make phpcs executable
+        run: chmod +x vendor/bin/phpcs
 
       - name: Run PHPCS linting
         run: |
-          ./vendor/bin/phpcs --standard=PSR2 src/MesDates.php
+          vendor/bin/phpcs --standard=PSR2 src/MesDates.php
 
       - name: Run PHPUnit tests
         run: |
-          ./vendor/bin/phpunit
+          vendor/bin/phpunit
