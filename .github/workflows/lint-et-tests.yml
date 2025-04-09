@@ -25,10 +25,10 @@ jobs:
         run: |
           composer install --no-dev
 
-      - name: Verify PHPCS installation and permissions
+      - name: Verify and fix PHPCS permissions
         run: |
-          ls -l vendor/bin/phpcs
-          chmod +x vendor/bin/phpcs || true  # In case phpcs is already executable, avoid error
+          ls -l vendor/bin/phpcs  # Check the file permissions
+          sudo chmod +x vendor/bin/phpcs  # Make sure it is executable
 
       - name: Run PHPCS linting
         run: |
