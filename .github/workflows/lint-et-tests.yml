@@ -19,11 +19,14 @@ jobs:
       - name: Set up PHP
         uses: shivammathur/setup-php@v2
         with:
-          php-version: '8.3.11'
+          php-version: '8.3'
 
       - name: Install dependencies
         run: |
           composer install --no-dev
+
+      - name: Make phpcs executable
+        run: chmod +x vendor/bin/phpcs
 
       - name: Run PHPCS linting
         run: |
